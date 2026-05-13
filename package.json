@@ -1,0 +1,25 @@
+{
+  "name": "web3-guard-sentinel",
+  "version": "1.0.0",
+  "description": "Web3-Guard Sentinel is a specialized vulnerability scanner designed to identify security risks in blockchain-related software dependencies and cryptographic implementations. This tool aims to integrate seamlessly into DevSecOps pipelines to ensure high security standards for Web3 applications.",
+  "main": "dist/sentinel.js",
+  "scripts": {
+    "start": "ts-node src/sentinel.ts",
+    "build": "tsc",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "web3",
+    "security",
+    "vulnerability-scanner",
+    "cryptography",
+    "devsecops"
+  ],
+  "author": "Kevin Matarewicz",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.0.0"
+  }
+}
