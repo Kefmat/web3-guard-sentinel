@@ -15,6 +15,7 @@ export interface VulnerabilityFinding {
     installedVersion: string;
     severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
     description: string;
+    cveId?: string; // Optional field for real upstream vulnerability IDs
 }
 
 /**
