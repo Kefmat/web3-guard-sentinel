@@ -35,7 +35,8 @@ export class FileReporter {
             mdContent += `No known security vulnerabilities were identified within this project configuration.\n`;
         } else {
             report.findings.forEach((finding) => {
-                mdContent += `### [${finding.severity}] Security Issue in \`${finding.library}\`\n`;
+                const idLabel = finding.cveId ? ` (${finding.cveId})` : '';
+                mdContent += `### [${finding.severity}] Security Issue in \`${finding.library}\`${idLabel}\n`;
                 mdContent += `- **Installed Package Version:** ${finding.installedVersion}\n`;
                 mdContent += `- **Threat Context:** ${finding.description}\n\n`;
             });
