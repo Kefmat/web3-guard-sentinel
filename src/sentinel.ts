@@ -1,3 +1,4 @@
+import { parseArgs } from 'util';
 import { ScannerEngine } from './engine/scanner.js';
 
 /**
@@ -7,26 +8,36 @@ import { ScannerEngine } from './engine/scanner.js';
  */
 class Sentinel {
     /**
-     * Parse system arguments and initialize execution.
+     * Parse system arguments using native Node.js util parser and initialize execution.
      */
     public static async main(): Promise<void> {
         console.log("Web3-Guard Sentinel v1.0.0");
         console.log("Status: Initializing security modules...");
 
-        const args = process.argv.slice(2);
-        
-        // Extract named parameters from terminal array strings
-        const pathIndex = args.indexOf('--path');
-        const failIndex = args.indexOf('--fail-on');
+        const options = {
+            path: { type: 'string' as const },
+            'fail-on': { type: 'string' as const }
+        };
 
-        const targetDirectory = (pathIndex !== -1 && args[pathIndex + 1]) ? args[pathIndex + 1]! : process.cwd();
-        const failThreshold = (failIndex !== -1 && args[failIndex + 1]) ? args[failIndex + 1]! : null;
+        try {
+            const { values } = parseArgs({ args: process.argv.slice(2), options, strict: false });
 
-        if (failThreshold) {
-            console.log(`Config: Policy enforcement active. Failing on severities >= ${failThreshold.toUpperCase()}`);
+            // Ensure targetDirectory is always treated as a single string string value
+            const targetDirectory = typeof values['path'] === 'string' ? values['path'] : process.cwd();
+            
+            // Type guard to filter out boolean 'true' flags that lack values
+            const failThreshold = typeof values['fail-on'] === 'string' ? values['fail-on'] : null;
+
+            if (failThreshold) {
+                console.log(`Config: Policy enforcement active. Failing on severities >= ${failThreshold.toUpperCase()}`);
+            }
+
+            await ScannerEngine.auditDependencies(targetDirectory, failThreshold);
+
+        } catch (error) {
+            console.error("Critical Runtime Error: Failed to parse execution arguments accurately.");
+            process.exit(1);
         }
-
-        await ScannerEngine.auditDependencies(targetDirectory, failThreshold);
     }
 }
 
