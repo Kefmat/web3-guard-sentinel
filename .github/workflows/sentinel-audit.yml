@@ -28,7 +28,7 @@ jobs:
         run: npm ci
 
       - name: Run Build and Security Scan
-        run: npm start
+        run: npm start -- --fail-on HIGH
 
       - name: Archive Security Scan Reports
         if: always()
