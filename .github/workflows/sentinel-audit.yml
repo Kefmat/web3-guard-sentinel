@@ -27,8 +27,11 @@ jobs:
       - name: Install Project Dependencies
         run: npm ci
 
+      - name: Compile TypeScript Application
+        run: npm run build
+
       - name: Run Build and Security Scan
-        run: npm start -- --fail-on HIGH
+        run: npm run scan -- --fail-on HIGH
 
       - name: Archive Security Scan Reports
         if: always()
