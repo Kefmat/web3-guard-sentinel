@@ -65,3 +65,19 @@ The smart contract scanner implements line-by-line pattern matching to safeguard
 | Reentrancy Insecurity | CRITICAL | Low-level `call{value: ...}` executed prior to localized state balance mutation. | Violates Checks-Effects-Interactions pattern; permits state re-entry to drain smart contract balances. |
 | Insecure Access Control | HIGH | Utilization of `tx.origin` inside evaluation assertions or conditional guards. | Exposes administrative functionality to phishing and origin-spoofing proxy intervention exploits. |
 | Outdated Compiler Specification | MEDIUM | Use of deprecated compiler versions (e.g. `^0.4.x`, `^0.5.x`, `^0.6.x`). | Leaves bytecode vulnerable to known, historic, unpatched compiler-level processing bugs. |
+
+## Getting Started
+
+### Prerequisites
+Node.js (v20.0.0 or higher recommended)
+
+TypeScript (v5.0.0 or higher)
+
+### Installation
+Clone the repository and install the developer dependencies cleanly:
+
+```
+git clone [https://github.com/Kefmat/web3-guard-sentinel.git](https://github.com/Kefmat/web3-guard-sentinel.git)
+cd web3-guard-sentinel
+npm ci
+```
