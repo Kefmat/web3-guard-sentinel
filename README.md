@@ -30,4 +30,15 @@ graph TD
     I --> L{Policy Enforcement Engine}
     L -->|Breach Detected| M[Process Exit 1 / Break Build]
     L -->|Compliant| N[Process Exit 0 / Pass Build]
-    ```
+```
+
+## Module Breakdown
+1. Orchestrator Context (sentinel.ts): Initializes core services, leverages native cross-platform token parsing to sanitize inputs, and configures enforcement thresholds.
+
+2. SCA Engine (scanner.ts): Extracts the localized dependency tree and runs concurrent asynchronous lookups using a pool pattern.
+
+3. Upstream Broker (osvService.ts): A network connection client interfacing with Google's Open Source Vulnerability (OSV) API database.
+
+4. Solidity Parser (contractScanner.ts): Reads smart contract code sequentially to intercept known offensive vulnerability anti-patterns.
+
+5. Automation Compliance Reporter (fileReporter.ts): Collects findings and handles asynchronous file system outputs.
