@@ -14,19 +14,19 @@ graph TD
     B --> C{Asset Discovery Engine}
     C -->|package.json| D[SCA Dependency Audit Module]
     C -->|*.sol| E[Solidity Static Analysis Module]
-    
+
     D --> F[Local Threat Registry Fallback]
     D --> G[Google Upstream OSV API Feed]
-    
+
     E --> H[AST-Heuristic Line Tokenizer]
-    
+
     F --> I[Unified Report Aggregator]
     G --> I
     H --> I
-    
+
     I --> J[JSON Structural Export]
     I --> K[Markdown Compliance Log]
-    
+
     I --> L{Policy Enforcement Engine}
     L -->|Breach Detected| M[Process Exit 1 / Break Build]
     L -->|Compliant| N[Process Exit 0 / Pass Build]
@@ -34,27 +34,18 @@ graph TD
 
 ## Module Breakdown
 
-1. Orchestrator Context (sentinel.ts): Initializes core services, leverages native cross-platform token parsing to sanitize inputs, and configures enforcement thresholds.
-
-2. SCA Engine (scanner.ts): Extracts the localized dependency tree and runs concurrent asynchronous lookups using a pool pattern.
-
-3. Upstream Broker (osvService.ts): A network connection client interfacing with Google's Open Source Vulnerability (OSV) API database.
-
-4. Solidity Parser (contractScanner.ts): Reads smart contract code sequentially to intercept known offensive vulnerability anti-patterns.
-
-5. Automation Compliance Reporter (fileReporter.ts): Collects findings and handles asynchronous file system outputs.
-
+1. **Orchestrator Context** (`sentinel.ts`): Initializes core services, leverages native cross-platform token parsing to sanitize inputs, and configures enforcement thresholds.
+2. **SCA Engine** (`scanner.ts`): Extracts the localized dependency tree and runs concurrent asynchronous lookups using a pool pattern.
+3. **Upstream Broker** (`osvService.ts`): Interfaces with Google's Open Source Vulnerability (OSV) API database.
+4. **Solidity Parser** (`contractScanner.ts`): Reads smart contract code sequentially to identify known vulnerability anti-patterns.
+5. **Automation Compliance Reporter** (`fileReporter.ts`): Collects findings and handles asynchronous file outputs.
 
 ## Core Features
 
-* Real-Time Threat Intelligence: Queries live distributed CVE and GitHub Advisory (GHA) record networks concurrently.
-
-* Smart Contract Static Analysis: Tokenizes raw .sol files to flags structural exploits, security bugs, and design anti-patterns.
-
-* Pipeline Enforcement (Policy-as-Code): Supports strict severity thresholds (--fail-on HIGH) to break automated CI/CD builds when severe risks are introduced.
-
-* Zero-Dependency Runtime Mapping: Runs natively using pure modern ECMAScript Modules (ESM) and Node.js core APIs for security and efficiency.
-
+- **Real-Time Threat Intelligence**: Queries live distributed CVE and GitHub Advisory (GHA) feeds concurrently.
+- **Smart Contract Static Analysis**: Tokenizes raw `.sol` files to flag structural exploits, security bugs, and design anti-patterns.
+- **Pipeline Enforcement (Policy-as-Code)**: Supports strict severity thresholds (`--fail-on HIGH`) to break automated CI/CD builds when severe risks are introduced.
+- **Zero-Dependency Runtime Mapping**: Runs natively using pure modern ECMAScript Modules (ESM) and Node.js core APIs for security and efficiency.
 
 ## Solidity Detection Vectors
 
@@ -69,15 +60,58 @@ The smart contract scanner implements line-by-line pattern matching to safeguard
 ## Getting Started
 
 ### Prerequisites
-Node.js (v20.0.0 or higher recommended)
 
-TypeScript (v5.0.0 or higher)
+- Node.js v20.0.0 or higher
+- TypeScript v5.0.0 or higher
 
 ### Installation
-Clone the repository and install the developer dependencies cleanly:
 
-```
-git clone [https://github.com/Kefmat/web3-guard-sentinel.git](https://github.com/Kefmat/web3-guard-sentinel.git)
+Clone the repository and install the developer dependencies:
+
+```bash
+git clone https://github.com/Kefmat/web3-guard-sentinel.git
 cd web3-guard-sentinel
 npm ci
+```
+
+### Run
+
+Compile and run the tool locally:
+
+```bash
+npm run build && npm start
+```
+
+### Example: enforce HIGH severity
+
+```bash
+node dist/sentinel.js --fail-on HIGH
+```
+
+## Continuous Integration (DevSecOps)
+
+The tool is optimized to run inside a CI environment. It generates artifact compliance outputs automatically on every `push` or `pull_request`.
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant Developer as Dev / Git Push
+    participant Runner as GitHub Actions Runner
+    participant Tool as Web3-Guard Sentinel
+    participant API as Live OSV API
+
+    Developer->>Runner: Trigger Pipeline (.github/workflows)
+    Runner->>Runner: Check out code & Build Environment
+    Runner->>Tool: Execute (node dist/sentinel.js --fail-on HIGH)
+    Tool->>API: Query Concurrent Package Matrix (POST)
+    API-->>Tool: Stream Live Vulnerability JSON
+    Tool->>Tool: Execute Solidity Structural Static Analysis
+    Tool->>Runner: Output JSON/MD Compliance Reports
+    alt Vulnerability Weight >= Policy Threshold
+        Tool->>Runner: Terminate Execution (Exit Code 1)
+        Runner-->>Developer: Build Failed / Deployment Blocked
+    else Clean / Compliant Run
+        Tool->>Runner: Terminate Execution (Exit Code 0)
+        Runner-->>Developer: Build Passed / Deployment Authorized
+    end
 ```
