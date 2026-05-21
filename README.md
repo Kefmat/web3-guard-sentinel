@@ -54,3 +54,14 @@ graph TD
 * Pipeline Enforcement (Policy-as-Code): Supports strict severity thresholds (--fail-on HIGH) to break automated CI/CD builds when severe risks are introduced.
 
 * Zero-Dependency Runtime Mapping: Runs natively using pure modern ECMAScript Modules (ESM) and Node.js core APIs for security and efficiency.
+
+
+## Solidity Detection Vectors
+
+The smart contract scanner implements line-by-line pattern matching to safeguard against systemic Web3 attack vectors.
+
+| Vulnerability Vector | Severity | Audit Flag Condition | Risk Context |
+| --- | --- | --- | --- |
+| Reentrancy Insecurity | CRITICAL | Low-level `call{value: ...}` executed prior to localized state balance mutation. | Violates Checks-Effects-Interactions pattern; permits state re-entry to drain smart contract balances. |
+| Insecure Access Control | HIGH | Utilization of `tx.origin` inside evaluation assertions or conditional guards. | Exposes administrative functionality to phishing and origin-spoofing proxy intervention exploits. |
+| Outdated Compiler Specification | MEDIUM | Use of deprecated compiler versions (e.g. `^0.4.x`, `^0.5.x`, `^0.6.x`). | Leaves bytecode vulnerable to known, historic, unpatched compiler-level processing bugs. |
