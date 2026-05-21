@@ -1,27 +1,33 @@
 # Web3-Guard Sentinel
 
-Web3-Guard Sentinel is a specialized vulnerability scanner designed to identify security risks in blockchain-related software dependencies and cryptographic implementations. This tool aims to integrate seamlessly into DevSecOps pipelines to ensure high security standards for Web3 applications.
+Web3-Guard Sentinel is an enterprise-grade static application security testing (SAST) utility and software composition analysis (SCA) engine designed for blockchain ecosystems. It evaluates project manifest dependencies against live vulnerability feeds and performs pattern-based static analysis on Solidity smart contracts to enforce automated security compliance within DevSecOps pipelines.
 
-## Project Vision
+---
 
-The goal of this project is to provide developers and security leads with a lightweight, automated tool that detects:
-1. Vulnerable versions of Web3 libraries (e.g., ethers.js, web3.js).
-2. Outdated or weak cryptographic hashing and encryption algorithms.
-3. Known vulnerabilities in smart contract dependency trees, such as OpenZeppelin library versions with reported issues.
+## System Architecture & Data Flow
 
-## Core Features
+The engine operates on a decoupled, modular design to maximize execution speed and maintain strict separation of concerns.
 
-- **Dependency Audit**: Scans project manifest files against the GitHub Advisory Database and specialized Web3 vulnerability sources.
-- **Static Analysis**: Pattern-based detection of insecure cryptographic practices within the source code.
-- **CI/CD Integration**: Designed to run as a GitHub Action to prevent insecure code from being merged.
-- **Professional Reporting**: Generates structured security reports in Markdown or PDF format for stakeholders.
-
-## Technical Foundation
-
-- **Language**: TypeScript
-- **Runtime**: Node.js
-- **Methodology**: Test-Driven Development (TDD) and Model-Based Systems Engineering (MBSE) principles.
-
-## Getting Started
-
-Detailed installation and usage instructions will be provided as the core modules are implemented.
+```mermaid
+graph TD
+    A[CLI Input / CI Pipeline] --> B(Sentinel Core Orchestrator)
+    B --> C{Asset Discovery Engine}
+    C -->|package.json| D[SCA Dependency Audit Module]
+    C -->|*.sol| E[Solidity Static Analysis Module]
+    
+    D --> F[Local Threat Registry Fallback]
+    D --> G[Google Upstream OSV API Feed]
+    
+    E --> H[AST-Heuristic Line Tokenizer]
+    
+    F --> I[Unified Report Aggregator]
+    G --> I
+    H --> I
+    
+    I --> J[JSON Structural Export]
+    I --> K[Markdown Compliance Log]
+    
+    I --> L{Policy Enforcement Engine}
+    L -->|Breach Detected| M[Process Exit 1 / Break Build]
+    L -->|Compliant| N[Process Exit 0 / Pass Build]
+    ```
