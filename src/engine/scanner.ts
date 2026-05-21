@@ -4,12 +4,12 @@ import { VULNERABILITY_REGISTRY } from '../registry/vulnerabilities.js';
 import { VulnerabilityFinding, ScanReport } from '../types/security.js';
 import { FileReporter } from '../reporters/fileReporter.js';
 import { OsvService } from '../services/osvService.js';
+import { ContractScannerEngine } from './contractScanner.js';
 
 /**
  * Handles file reading, dependency evaluation, and build enforcement tasks.
  */
 export class ScannerEngine {
-    // Severity weight mappings to programmatically calculate threshold breaches
     private static readonly SEVERITY_WEIGHTS: Record<string, number> = {
         'LOW': 1,
         'MEDIUM': 2,
@@ -18,42 +18,83 @@ export class ScannerEngine {
     };
 
     /**
-     * Audits the dependencies found within the target project directory.
-     * @param targetDirectory The project directory containing the package.json.
+     * Audits the dependencies and smart contracts found within the target project directory.
+     * @param targetDirectory The project directory containing assets.
      * @param failThreshold The minimum severity level required to fail the build.
      */
     public static async auditDependencies(targetDirectory: string, failThreshold: string | null): Promise<void> {
         const filePath = path.join(targetDirectory, 'package.json');
+        let dependencyFindings: VulnerabilityFinding[] = [];
+        let totalScanned = 0;
 
-        if (!fs.existsSync(filePath)) {
-            console.error(`Error: Target manifest file not found at ${filePath}`);
-            process.exit(1);
+        // 1. Dependency Analysis Phase
+        if (fs.existsSync(filePath)) {
+            try {
+                console.log(`System: Scanning manifest file at ${filePath}...`);
+                const fileContent = fs.readFileSync(filePath, 'utf8');
+                const manifest = JSON.parse(fileContent);
+                
+                const dependencies = {
+                    ...manifest.dependencies,
+                    ...manifest.devDependencies
+                };
+
+                console.log("Status: Analyzing dependency tree...");
+                const result = await this.evaluateDependencies(dependencies);
+                dependencyFindings = result.findings;
+                totalScanned = result.totalScanned;
+
+            } catch (error) {
+                console.error("Error: Failed to parse the target manifest file safely.");
+                process.exit(1);
+            }
         }
 
-        try {
-            console.log(`System: Scanning manifest file at ${filePath}...`);
-            const fileContent = fs.readFileSync(filePath, 'utf8');
-            const manifest = JSON.parse(fileContent);
-            
-            const dependencies = {
-                ...manifest.dependencies,
-                ...manifest.devDependencies
-            };
+        // 2. Smart Contract Analysis Phase
+        const contractFindings = ContractScannerEngine.scanContracts(targetDirectory);
+        
+        // Combine all findings into a single unified ledger
+        const allFindings = [...dependencyFindings, ...contractFindings];
 
-            console.log("Status: Analyzing dependency tree...");
-            await this.evaluateVulnerabilities(dependencies, filePath, failThreshold);
+        console.log(`\nScan complete. Total vulnerabilities identified: ${allFindings.length}`);
 
-        } catch (error) {
-            console.error("Error: Failed to parse the target manifest file safely.");
-            process.exit(1);
+        const report: ScanReport = {
+            timestamp: new Date().toISOString(),
+            targetFile: fs.existsSync(filePath) ? 'package.json & Contracts' : 'Contracts Only',
+            summary: {
+                totalDependenciesScanned: totalScanned,
+                vulnerabilitiesIdentified: allFindings.length
+            },
+            findings: allFindings
+        };
+
+        FileReporter.generateAutomatedReports(report);
+
+        // Policy Enforcement Threshold Check
+        if (failThreshold && this.SEVERITY_WEIGHTS[failThreshold.toUpperCase()]) {
+            const targetWeight = this.SEVERITY_WEIGHTS[failThreshold.toUpperCase()]!;
+            let breachDetected = false;
+
+            for (const finding of allFindings) {
+                const findingWeight = this.SEVERITY_WEIGHTS[finding.severity] || 0;
+                if (findingWeight >= targetWeight) {
+                    console.error(`\n[PIPELINE FAILURE] Severity threshold breach: Found ${finding.severity} issue in ${finding.library}.`);
+                    breachDetected = true;
+                }
+            }
+
+            if (breachDetected) {
+                console.error("System Action: Terminating execution process with failure code.");
+                process.exit(1);
+            }
         }
     }
 
     /**
-     * Evaluates identified dependencies and checks if severity limits are breached.
+     * Helper to process dependencies against local definitions and the OSV API.
      */
-    private static async evaluateVulnerabilities(dependencies: Record<string, string>, targetFile: string, failThreshold: string | null): Promise<void> {
-        let findings: VulnerabilityFinding[] = [];
+    private static async evaluateDependencies(dependencies: Record<string, string>): Promise<{ findings: VulnerabilityFinding[], totalScanned: number }> {
+        const findings: VulnerabilityFinding[] = [];
         let totalScanned = 0;
         const apiQueries: Promise<VulnerabilityFinding[]>[] = [];
 
@@ -61,7 +102,6 @@ export class ScannerEngine {
             totalScanned++;
             const localRule = VULNERABILITY_REGISTRY[pkg];
             if (localRule) {
-                console.warn(`[LOCAL MATCH] Static rule fallback hit for library: ${pkg}`);
                 findings.push({
                     library: pkg,
                     installedVersion: version,
@@ -77,44 +117,10 @@ export class ScannerEngine {
         
         apiResults.forEach((result) => {
             if (result.length > 0) {
-                result.forEach((finding) => {
-                    console.warn(`[LIVE ADVISORY] Upstream threat tracked for package: ${finding.library} (${finding.cveId})`);
-                });
-                findings = [...findings, ...result];
+                findings.push(...result);
             }
         });
 
-        console.log(`\nScan complete. Total vulnerabilities identified: ${findings.length}`);
-
-        const report: ScanReport = {
-            timestamp: new Date().toISOString(),
-            targetFile: path.basename(targetFile),
-            summary: {
-                totalDependenciesScanned: totalScanned,
-                vulnerabilitiesIdentified: findings.length
-            },
-            findings: findings
-        };
-
-        FileReporter.generateAutomatedReports(report);
-
-        // Check if any finding breaches the automated pipeline threshold flag
-        if (failThreshold && this.SEVERITY_WEIGHTS[failThreshold.toUpperCase()]) {
-            const targetWeight = this.SEVERITY_WEIGHTS[failThreshold.toUpperCase()]!;
-            let breachDetected = false;
-
-            for (const finding of findings) {
-                const findingWeight = this.SEVERITY_WEIGHTS[finding.severity] || 0;
-                if (findingWeight >= targetWeight) {
-                    console.error(`\n[PIPELINE FAILURE] Severity threshold breach: Found ${finding.severity} issue in ${finding.library}.`);
-                    breachDetected = true;
-                }
-            }
-
-            if (breachDetected) {
-                console.error("System Action: Terminating execution process with failure code.");
-                process.exit(1);
-            }
-        }
+        return { findings, totalScanned };
     }
 }
