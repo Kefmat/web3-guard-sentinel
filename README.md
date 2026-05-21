@@ -33,6 +33,7 @@ graph TD
 ```
 
 ## Module Breakdown
+
 1. Orchestrator Context (sentinel.ts): Initializes core services, leverages native cross-platform token parsing to sanitize inputs, and configures enforcement thresholds.
 
 2. SCA Engine (scanner.ts): Extracts the localized dependency tree and runs concurrent asynchronous lookups using a pool pattern.
@@ -42,3 +43,14 @@ graph TD
 4. Solidity Parser (contractScanner.ts): Reads smart contract code sequentially to intercept known offensive vulnerability anti-patterns.
 
 5. Automation Compliance Reporter (fileReporter.ts): Collects findings and handles asynchronous file system outputs.
+
+
+## Core Features
+
+* Real-Time Threat Intelligence: Queries live distributed CVE and GitHub Advisory (GHA) record networks concurrently.
+
+* Smart Contract Static Analysis: Tokenizes raw .sol files to flags structural exploits, security bugs, and design anti-patterns.
+
+* Pipeline Enforcement (Policy-as-Code): Supports strict severity thresholds (--fail-on HIGH) to break automated CI/CD builds when severe risks are introduced.
+
+* Zero-Dependency Runtime Mapping: Runs natively using pure modern ECMAScript Modules (ESM) and Node.js core APIs for security and efficiency.
