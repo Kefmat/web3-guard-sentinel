@@ -1,12 +1,15 @@
 /**
  * Utility for parsing and normalizing Semantic Version (SemVer) strings.
  * Isolates range prefixes to ensure clean compatibility with upstream vulnerability schemas.
+ *
+ * @author Kevin Matarewicz
  */
 export class SemVerUtil {
     /**
      * Extracts a clean, exact version string from common SemVer range definitions.
      * Handles prefixes such as caret (^), tilde (~), and logical inequality symbols.
-     * * @param versionRange The raw version string from package.json
+     *
+     * @param versionRange The raw version string from package.json
      * @returns A sanitized exact version string for API querying.
      */
     public static normalizeVersion(versionRange: string): string {
@@ -26,7 +29,7 @@ export class SemVerUtil {
         // Handle logical OR conditions or compound ranges (e.g., ">=1.0.0 <2.0.0")
         // Split by space or comma and take the first valid match
         const parts = clean.split(/[\s,]+/);
-        if (parts.length > 0) {
+        if (parts.length > 0 && parts[0]) {
             clean = parts[0];
         }
 

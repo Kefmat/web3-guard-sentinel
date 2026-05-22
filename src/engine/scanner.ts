@@ -5,6 +5,7 @@ import { VulnerabilityFinding, ScanReport } from '../types/security.js';
 import { FileReporter } from '../reporters/fileReporter.js';
 import { OsvService } from '../services/osvService.js';
 import { ContractScannerEngine } from './contractScanner.js';
+import { SemVerUtil } from '../utils/semver.js';
 
 /**
  * Handles file reading, dependency evaluation, and build enforcement tasks.
@@ -27,7 +28,6 @@ export class ScannerEngine {
         let dependencyFindings: VulnerabilityFinding[] = [];
         let totalScanned = 0;
 
-        // 1. Dependency Analysis Phase
         if (fs.existsSync(filePath)) {
             try {
                 console.log(`System: Scanning manifest file at ${filePath}...`);
@@ -50,10 +50,7 @@ export class ScannerEngine {
             }
         }
 
-        // 2. Smart Contract Analysis Phase
         const contractFindings = ContractScannerEngine.scanContracts(targetDirectory);
-        
-        // Combine all findings into a single unified ledger
         const allFindings = [...dependencyFindings, ...contractFindings];
 
         console.log(`\nScan complete. Total vulnerabilities identified: ${allFindings.length}`);
@@ -70,7 +67,6 @@ export class ScannerEngine {
 
         FileReporter.generateAutomatedReports(report);
 
-        // Policy Enforcement Threshold Check
         if (failThreshold && this.SEVERITY_WEIGHTS[failThreshold.toUpperCase()]) {
             const targetWeight = this.SEVERITY_WEIGHTS[failThreshold.toUpperCase()]!;
             let breachDetected = false;
@@ -98,18 +94,24 @@ export class ScannerEngine {
         let totalScanned = 0;
         const apiQueries: Promise<VulnerabilityFinding[]>[] = [];
 
-        for (const [pkg, version] of Object.entries(dependencies)) {
+        for (const [pkg, versionRange] of Object.entries(dependencies)) {
             totalScanned++;
+            
+            // Normalize the SemVer range string into a clean, exact version format
+            const cleanVersion = SemVerUtil.normalizeVersion(versionRange);
+
             const localRule = VULNERABILITY_REGISTRY[pkg];
             if (localRule) {
                 findings.push({
                     library: pkg,
-                    installedVersion: version,
+                    installedVersion: cleanVersion,
                     severity: localRule.severity,
                     description: localRule.description
                 });
             }
-            apiQueries.push(OsvService.queryPackage(pkg, version));
+            
+            // Dispatch the normalized version to the live OSV threat feed
+            apiQueries.push(OsvService.queryPackage(pkg, cleanVersion));
         }
 
         console.log("Status: Dispatching concurrent query pool to live OSV threat feed...");
