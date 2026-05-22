@@ -9,6 +9,7 @@ import { SemVerUtil } from '../utils/semver.js';
 
 /**
  * Handles file reading, dependency evaluation, and build enforcement tasks.
+ * * @author Kevin Matarewicz
  */
 export class ScannerEngine {
     private static readonly SEVERITY_WEIGHTS: Record<string, number> = {
@@ -20,7 +21,7 @@ export class ScannerEngine {
 
     /**
      * Audits the dependencies and smart contracts found within the target project directory.
-     * @param targetDirectory The project directory containing assets.
+     * * @param targetDirectory The project directory containing assets.
      * @param failThreshold The minimum severity level required to fail the build.
      */
     public static async auditDependencies(targetDirectory: string, failThreshold: string | null): Promise<void> {
@@ -88,8 +89,11 @@ export class ScannerEngine {
 
     /**
      * Helper to process dependencies against local definitions and the OSV API.
+     * Includes an explicit type guard to safely handle potentially undefined string values.
+     * * @param dependencies Record layout of package target variations.
+     * @returns An object containing grouped vulnerability findings and total scanned count.
      */
-    private static async evaluateDependencies(dependencies: Record<string, string>): Promise<{ findings: VulnerabilityFinding[], totalScanned: number }> {
+    private static async evaluateDependencies(dependencies: Record<string, string | undefined>): Promise<{ findings: VulnerabilityFinding[], totalScanned: number }> {
         const findings: VulnerabilityFinding[] = [];
         let totalScanned = 0;
         const apiQueries: Promise<VulnerabilityFinding[]>[] = [];
@@ -97,8 +101,11 @@ export class ScannerEngine {
         for (const [pkg, versionRange] of Object.entries(dependencies)) {
             totalScanned++;
             
+            // Cast or fall back to an empty string if the version range is undefined to meet type constraints
+            const safeVersionRange = typeof versionRange === 'string' ? versionRange : '';
+            
             // Normalize the SemVer range string into a clean, exact version format
-            const cleanVersion = SemVerUtil.normalizeVersion(versionRange);
+            const cleanVersion = SemVerUtil.normalizeVersion(safeVersionRange);
 
             const localRule = VULNERABILITY_REGISTRY[pkg];
             if (localRule) {
