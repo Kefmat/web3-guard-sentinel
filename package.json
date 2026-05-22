@@ -6,8 +6,8 @@
   "type": "module",
   "scripts": {
     "build": "tsc",
-    "start": "npm run build && node dist/sentinel.js",
-    "scan": "npm run build && node dist/sentinel.js"
+    "start": "node dist/sentinel.js",
+    "scan": "node dist/sentinel.js"
   },
   "keywords": [
     "web3",
