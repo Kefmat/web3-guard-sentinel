@@ -1,0 +1,108 @@
+{
+    "timestamp": "2026-05-26T08:52:01.592Z",
+    "targetFile": "package-lock.json & Contracts",
+    "summary": {
+        "totalDependenciesScanned": 64,
+        "vulnerabilitiesIdentified": 15
+    },
+    "findings": [
+        {
+            "library": "ethers",
+            "installedVersion": "5.5.0",
+            "severity": "HIGH",
+            "description": "Potential padding oracle vulnerability in cryptographic decryption routines."
+        },
+        {
+            "library": "elliptic",
+            "installedVersion": "6.5.4",
+            "severity": "HIGH",
+            "description": "Elliptic's verify function omits uniqueness validation",
+            "cveId": "GHSA-434g-2637-qmqr"
+        },
+        {
+            "library": "elliptic",
+            "installedVersion": "6.5.4",
+            "severity": "HIGH",
+            "description": "Elliptic allows BER-encoded signatures",
+            "cveId": "GHSA-49q7-c7j4-3p7m"
+        },
+        {
+            "library": "elliptic",
+            "installedVersion": "6.5.4",
+            "severity": "HIGH",
+            "description": "Elliptic Uses a Cryptographic Primitive with a Risky Implementation",
+            "cveId": "GHSA-848j-6mx2-7j84"
+        },
+        {
+            "library": "elliptic",
+            "installedVersion": "6.5.4",
+            "severity": "HIGH",
+            "description": "Elliptic's ECDSA missing check for whether leading bit of r and s is zero",
+            "cveId": "GHSA-977x-g7h5-7qgw"
+        },
+        {
+            "library": "elliptic",
+            "installedVersion": "6.5.4",
+            "severity": "HIGH",
+            "description": "Elliptic's EDDSA missing signature length check",
+            "cveId": "GHSA-f7q4-pwc6-w24p"
+        },
+        {
+            "library": "elliptic",
+            "installedVersion": "6.5.4",
+            "severity": "HIGH",
+            "description": "Valid ECDSA signatures erroneously rejected in Elliptic",
+            "cveId": "GHSA-fc9h-whq2-v747"
+        },
+        {
+            "library": "elliptic",
+            "installedVersion": "6.5.4",
+            "severity": "HIGH",
+            "description": "Elliptic's private key extraction in ECDSA upon signing a malformed input (e.g. a string)",
+            "cveId": "GHSA-vjh7-7g9h-fjfh"
+        },
+        {
+            "library": "ws",
+            "installedVersion": "7.4.6",
+            "severity": "HIGH",
+            "description": "ws affected by a DoS when handling a request with many HTTP headers",
+            "cveId": "GHSA-3h5v-q93c-6h6q"
+        },
+        {
+            "library": "VulnerableWallet.sol (Line 2)",
+            "installedVersion": "Solidity Codebase",
+            "severity": "MEDIUM",
+            "description": "Outdated compiler configuration: Lock specifications under version 0.8.0 expose bytecode assets to historic compilation bugs and unexpected state overflows."
+        },
+        {
+            "library": "VulnerableWallet.sol (Line 10)",
+            "installedVersion": "Solidity Codebase",
+            "severity": "HIGH",
+            "description": "Unprotected contract proxy initializer detected: Missing structural initializer protection rules allows front-running configuration privileges."
+        },
+        {
+            "library": "VulnerableWallet.sol (Line 24)",
+            "installedVersion": "Solidity Codebase",
+            "severity": "CRITICAL",
+            "description": "Potential Reentrancy exposure: Low-level call validation pattern flags consecutive state changes outside safe transactional sequencing rules."
+        },
+        {
+            "library": "VulnerableWallet.sol (Line 33)",
+            "installedVersion": "Solidity Codebase",
+            "severity": "HIGH",
+            "description": "Insecure authorization pattern: Relying on tx.origin for access controls exposes functions to phishing proxy contract intervention attacks."
+        },
+        {
+            "library": "VulnerableWallet.sol (Line 40)",
+            "installedVersion": "Solidity Codebase",
+            "severity": "LOW",
+            "description": "Informational: Inline assembly block (Yul dialect) observed. Custom low-level logic operations bypass standard memory boundaries and require strict code verification."
+        },
+        {
+            "library": "VulnerableWallet.sol (Line 48)",
+            "installedVersion": "Solidity Codebase",
+            "severity": "CRITICAL",
+            "description": "Dangerous state destruction function: Use of selfdestruct leaves contracts vulnerable to balance trapping and arbitrary logic loss."
+        }
+    ]
+}
