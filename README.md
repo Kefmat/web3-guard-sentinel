@@ -59,6 +59,10 @@ The smart contract scanner implements line-by-line pattern matching to safeguard
 | Insecure Access Control | HIGH | Utilization of `tx.origin` inside evaluation assertions or conditional guards. | Exposes administrative functionality to phishing and origin-spoofing proxy intervention exploits. |
 | Outdated Compiler Specification | MEDIUM | Use of deprecated compiler versions (e.g. `^0.4.x`, `^0.5.x`, `^0.6.x`). | Leaves bytecode vulnerable to known, historic, unpatched compiler-level processing bugs. |
 
+## Execution Demo & Visual Dashboard
+
+<img width="629" height="804" alt="image" src="https://github.com/user-attachments/assets/66e9a8db-79f3-41d2-947d-0625b16e8506" />
+
 ## Getting Started
 
 ### Prerequisites
