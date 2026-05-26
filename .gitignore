@@ -6,11 +6,11 @@ dist/
 out/
 
 # Automated Security Reports
-# Ignore the reports directory by default, but explicitly track the report files
+# Ignore the reports directory structure, but track our official output formats
 reports/*
-!reports/security-report.json
-!reports/security-report.md
-!reports/security-dashboard.html
+!reports/*.json
+!reports/*.md
+!reports/*.html
 
 # TypeScript-specific
 *.tsbuildinfo
