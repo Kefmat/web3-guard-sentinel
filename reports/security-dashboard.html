@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web3-Guard Sentinel | Security Dashboard</title>
+    <style>
+        
+:root {
+    --bg-main: #0d1117;
+    --bg-card: #161b22;
+    --border: #30363d;
+    --text-primary: #c9d1d9;
+    --text-secondary: #8b949e;
+    --critical: #f85149;
+    --high: #ff964f;
+    --medium: #e3b341;
+    --low: #58a6ff;
+}
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background-color: var(--bg-main);
+    color: var(--text-primary);
+    margin: 0;
+    padding: 2rem;
+}
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 1.5rem;
+    margin-bottom: 2rem;
+}
+h1 { margin: 0; font-size: 1.75rem; font-weight: 600; color: #fff; }
+.timestamp { color: var(--text-secondary); font-size: 0.875rem; }
+
+.metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+.card {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 1.25rem;
+}
+.card-title { font-size: 0.85rem; color: var(--text-secondary); font-weight: 500; text-transform: uppercase; }
+.card-value { font-size: 2rem; font-weight: 600; margin-top: 0.5rem; color: #fff; }
+
+.severity-breakdown {
+    display: flex;
+    height: 12px;
+    border-radius: 6px;
+    overflow: hidden;
+    margin-bottom: 2.5rem;
+    background: #21262d;
+}
+.sev-bar { height: 100%; transition: width 0.3s ease; }
+
+.findings-section {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+}
+.section-title {
+    padding: 1rem 1.25rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    border-bottom: 1px solid var(--border);
+    margin: 0;
+    background-color: #1f242c;
+}
+table { width: 100%; border-collapse: collapse; text-align: left; }
+th { background-color: #1f242c; color: var(--text-secondary); font-weight: 500; font-size: 0.85rem; padding: 0.75rem 1.25rem; border-bottom: 1px solid var(--border); }
+td { padding: 1rem 1.25rem; border-bottom: 1px solid var(--border); font-size: 0.9rem; vertical-align: top; }
+tr:last-child td { border-bottom: none; }
+
+.badge {
+    display: inline-block;
+    padding: 0.15rem 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border-radius: 20px;
+    text-transform: uppercase;
+}
+.badge-critical { background: rgba(248, 81, 73, 0.15); color: var(--critical); border: 1px solid rgba(248, 81, 73, 0.3); }
+.badge-high { background: rgba(255, 150, 79, 0.15); color: var(--high); border: 1px solid rgba(255, 150, 79, 0.3); }
+.badge-medium { background: rgba(227, 179, 65, 0.15); color: var(--medium); border: 1px solid rgba(227, 179, 65, 0.3); }
+.badge-low { background: rgba(88, 166, 255, 0.15); color: var(--low); border: 1px solid rgba(88, 166, 255, 0.3); }
+
+.code-location { font-family: monospace; background: #21262d; padding: 0.2rem 0.4rem; border-radius: 4px; color: #ff79c6; }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div>
+                <h1>Web3-Guard Sentinel Security Compliance Report</h1>
+                <div class="timestamp">Target: <strong>package-lock.json & Contracts</strong> &bull; Generated: 26.5.2026, 11:00:09</div>
+            </div>
+            <div>
+                <span class="badge badge-critical" style="font-size:0.9rem; padding:0.4rem 0.8rem">v1.1.0 Dashboard</span>
+            </div>
+        </header>
+
+        <div class="metrics-grid">
+            <div class="card">
+                <div class="card-title">Total Modules Audited</div>
+                <div class="card-value">64</div>
+            </div>
+            <div class="card" style="border-left: 4px solid var(--critical)">
+                <div class="card-title">Critical Threats</div>
+                <div class="card-value">2</div>
+            </div>
+            <div class="card" style="border-left: 4px solid var(--high)">
+                <div class="card-title">High Severity</div>
+                <div class="card-value">11</div>
+            </div>
+            <div class="card" style="border-left: 4px solid var(--medium)">
+                <div class="card-title">Medium / Low</div>
+                <div class="card-value">2</div>
+            </div>
+        </div>
+
+        <div class="severity-breakdown">
+            <div class="sev-bar" style="background-color: var(--critical); width: 13.333333333333334%"></div>
+            <div class="sev-bar" style="background-color: var(--high); width: 73.33333333333333%"></div>
+            <div class="sev-bar" style="background-color: var(--medium); width: 6.666666666666667%"></div>
+            <div class="sev-bar" style="background-color: var(--low); width: 6.666666666666667%"></div>
+        </div>
+
+        <div class="findings-section">
+            <h2 class="section-title">Identified Vulnerability Log (15 issues)</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 15%">Severity</th>
+                        <th style="width: 25%">Target Component</th>
+                        <th style="width: 60%">Vulnerability Details</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    
+                        <tr>
+                            <td>
+                                <span class="badge badge-high">HIGH</span>
+                            </td>
+                            <td>
+                                <strong style="color:#fff">ethers</strong>
+                                <div style="font-size:0.8rem; color:var(--text-secondary); margin-top:0.25rem">Version: 5.5.0</div>
+                            </td>
+                            <td>
+                                <div style="line-height:1.5; color: #e6edf3">Potential padding oracle vulnerability in cryptographic decryption routines.</div>
+                            </td>
+                        </tr>
+                    
+                        <tr>
+                            <td>
+                                <span class="badge badge-high">HIGH</span>
+                            </td>
+                            <td>
+                                <strong style="color:#fff">elliptic</strong>
+                                <div style="font-size:0.8rem; color:var(--text-secondary); margin-top:0.25rem">Version: 6.5.4</div>
+                            </td>
+                            <td>
+                                <div style="line-height:1.5; color: #e6edf3">Elliptic's verify function omits uniqueness validation</div>
+                            </td>
+                        </tr>
+                    
+                        <tr>
+                            <td>
+                                <span class="badge badge-high">HIGH</span>
+                            </td>
+                            <td>
+                                <strong style="color:#fff">elliptic</strong>
+                                <div style="font-size:0.8rem; color:var(--text-secondary); margin-top:0.25rem">Version: 6.5.4</div>
+                            </td>
+                            <td>
+                                <div style="line-height:1.5; color: #e6edf3">Elliptic allows BER-encoded signatures</div>
+                            </td>
+                        </tr>
+                    
+                        <tr>
+                            <td>
+                                <span class="badge badge-high">HIGH</span>
+                            </td>
+                            <td>
+                                <strong style="color:#fff">elliptic</strong>
+                                <div style="font-size:0.8rem; color:var(--text-secondary); margin-top:0.25rem">Version: 6.5.4</div>
+                            </td>
+                            <td>
+                                <div style="line-height:1.5; color: #e6edf3">Elliptic Uses a Cryptographic Primitive with a Risky Implementation</div>
+                            </td>
+                        </tr>
+                    
+                        <tr>
+                            <td>
+                                <span class="badge badge-high">HIGH</span>
+                            </td>
+                            <td>
+                                <strong style="color:#fff">elliptic</strong>
+                                <div style="font-size:0.8rem; color:var(--text-secondary); margin-top:0.25rem">Version: 6.5.4</div>
+                            </td>
+                            <td>
+                                <div style="line-height:1.5; color: #e6edf3">Elliptic's ECDSA missing check for whether leading bit of r and s is zero</div>
+                            </td>
+                        </tr>
+                    
+                        <tr>
+                            <td>
+                                <span class="badge badge-high">HIGH</span>
+                            </td>
+                            <td>
+                                <strong style="color:#fff">elliptic</strong>
+                                <div style="font-size:0.8rem; color:var(--text-secondary); margin-top:0.25rem">Version: 6.5.4</div>
+                            </td>
+                            <td>
+                                <div style="line-height:1.5; color: #e6edf3">Elliptic's EDDSA missing signature length check</div>
+                            </td>
+                        </tr>
+                    
+                        <tr>
+                            <td>
+                                <span class="badge badge-high">HIGH</span>
+                            </td>
+                            <td>
+                                <strong style="color:#fff">elliptic</strong>
+                                <div style="font-size:0.8rem; color:var(--text-secondary); margin-top:0.25rem">Version: 6.5.4</div>
+                            </td>
+                            <td>
+                                <div style="line-height:1.5; color: #e6edf3">Valid ECDSA signatures erroneously rejected in Elliptic</div>
+                            </td>
+                        </tr>
+                    
+                        <tr>
+                            <td>
+                                <span class="badge badge-high">HIGH</span>
+                            </td>
+                            <td>
+                                <strong style="color:#fff">elliptic</strong>
+                                <div style="font-size:0.8rem; color:var(--text-secondary); margin-top:0.25rem">Version: 6.5.4</div>
+                            </td>
+                            <td>
+                                <div style="line-height:1.5; color: #e6edf3">Elliptic's private key extraction in ECDSA upon signing a malformed input (e.g. a string)</div>
+                            </td>
+                        </tr>
+                    
+                        <tr>
+                            <td>
+                                <span class="badge badge-high">HIGH</span>
+                            </td>
+                            <td>
+                                <strong style="color:#fff">ws</strong>
+                                <div style="font-size:0.8rem; color:var(--text-secondary); margin-top:0.25rem">Version: 7.4.6</div>
+                            </td>
+                            <td>
+                                <div style="line-height:1.5; color: #e6edf3">ws affected by a DoS when handling a request with many HTTP headers</div>
+                            </td>
+                        </tr>
+                    
+                        <tr>
+                            <td>
+                                <span class="badge badge-medium">MEDIUM</span>
+                            </td>
+                            <td>
+                                <strong style="color:#fff">VulnerableWallet.sol (Line 2)</strong>
+                                <div style="font-size:0.8rem; color:var(--text-secondary); margin-top:0.25rem">Version: Solidity Codebase</div>
+                            </td>
+                            <td>
+                                <div style="line-height:1.5; color: #e6edf3">Outdated compiler configuration: Lock specifications under version 0.8.0 expose bytecode assets to historic compilation bugs and unexpected state overflows.</div>
+                            </td>
+                        </tr>
+                    
+                        <tr>
+                            <td>
+                                <span class="badge badge-high">HIGH</span>
+                            </td>
+                            <td>
+                                <strong style="color:#fff">VulnerableWallet.sol (Line 10)</strong>
+                                <div style="font-size:0.8rem; color:var(--text-secondary); margin-top:0.25rem">Version: Solidity Codebase</div>
+                            </td>
+                            <td>
+                                <div style="line-height:1.5; color: #e6edf3">Unprotected contract proxy initializer detected: Missing structural initializer protection rules allows front-running configuration privileges.</div>
+                            </td>
+                        </tr>
+                    
+                        <tr>
+                            <td>
+                                <span class="badge badge-critical">CRITICAL</span>
+                            </td>
+                            <td>
+                                <strong style="color:#fff">VulnerableWallet.sol (Line 24)</strong>
+                                <div style="font-size:0.8rem; color:var(--text-secondary); margin-top:0.25rem">Version: Solidity Codebase</div>
+                            </td>
+                            <td>
+                                <div style="line-height:1.5; color: #e6edf3">Potential Reentrancy exposure: Low-level call validation pattern flags consecutive state changes outside safe transactional sequencing rules.</div>
+                            </td>
+                        </tr>
+                    
+                        <tr>
+                            <td>
+                                <span class="badge badge-high">HIGH</span>
+                            </td>
+                            <td>
+                                <strong style="color:#fff">VulnerableWallet.sol (Line 33)</strong>
+                                <div style="font-size:0.8rem; color:var(--text-secondary); margin-top:0.25rem">Version: Solidity Codebase</div>
+                            </td>
+                            <td>
+                                <div style="line-height:1.5; color: #e6edf3">Insecure authorization pattern: Relying on tx.origin for access controls exposes functions to phishing proxy contract intervention attacks.</div>
+                            </td>
+                        </tr>
+                    
+                        <tr>
+                            <td>
+                                <span class="badge badge-low">LOW</span>
+                            </td>
+                            <td>
+                                <strong style="color:#fff">VulnerableWallet.sol (Line 40)</strong>
+                                <div style="font-size:0.8rem; color:var(--text-secondary); margin-top:0.25rem">Version: Solidity Codebase</div>
+                            </td>
+                            <td>
+                                <div style="line-height:1.5; color: #e6edf3">Informational: Inline assembly block (Yul dialect) observed. Custom low-level logic operations bypass standard memory boundaries and require strict code verification.</div>
+                            </td>
+                        </tr>
+                    
+                        <tr>
+                            <td>
+                                <span class="badge badge-critical">CRITICAL</span>
+                            </td>
+                            <td>
+                                <strong style="color:#fff">VulnerableWallet.sol (Line 48)</strong>
+                                <div style="font-size:0.8rem; color:var(--text-secondary); margin-top:0.25rem">Version: Solidity Codebase</div>
+                            </td>
+                            <td>
+                                <div style="line-height:1.5; color: #e6edf3">Dangerous state destruction function: Use of selfdestruct leaves contracts vulnerable to balance trapping and arbitrary logic loss.</div>
+                            </td>
+                        </tr>
+                    
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>
