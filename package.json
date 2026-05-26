@@ -1,6 +1,6 @@
 {
   "name": "web3-guard-sentinel",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Web3-Guard Sentinel is a specialized vulnerability scanner designed to identify security risks in blockchain-related software dependencies and cryptographic implementations. This tool aims to integrate seamlessly into DevSecOps pipelines to ensure high security standards for Web3 applications.",
   "main": "dist/sentinel.js",
   "type": "module",
