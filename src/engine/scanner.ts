@@ -8,7 +8,7 @@ import { ContractScannerEngine } from './contractScanner.js';
 import { SemVerUtil } from '../utils/semver.js';
 
 /**
- * Handles file reading, dependency evaluation, and build enforcement tasks.
+ * Handles file reading, dependency evaluation, lockfile graph traversal, and build enforcement tasks.
  * * @author Kevin Matarewicz
  */
 export class ScannerEngine {
@@ -25,14 +25,56 @@ export class ScannerEngine {
      * @param failThreshold The minimum severity level required to fail the build.
      */
     public static async auditDependencies(targetDirectory: string, failThreshold: string | null): Promise<void> {
-        const filePath = path.join(targetDirectory, 'package.json');
+        const packageJsonPath = path.join(targetDirectory, 'package.json');
+        const lockfileJsonPath = path.join(targetDirectory, 'package-lock.json');
+        
         let dependencyFindings: VulnerabilityFinding[] = [];
         let totalScanned = 0;
+        let scanTargetContext = 'Contracts Only';
 
-        if (fs.existsSync(filePath)) {
+        // Check for deep lockfile availability first, then fall back to traditional manifest files
+        if (fs.existsSync(lockfileJsonPath)) {
             try {
-                console.log(`System: Scanning manifest file at ${filePath}...`);
-                const fileContent = fs.readFileSync(filePath, 'utf8');
+                console.log(`System: Found deep lockfile at ${lockfileJsonPath}. Parsing full graph layout...`);
+                const fileContent = fs.readFileSync(lockfileJsonPath, 'utf8');
+                const lockfile = JSON.parse(fileContent);
+                
+                const dependenciesToScan: Record<string, string> = {};
+
+                // Parse modern lockfile formats (v2 & v3 contain a flat 'packages' tree map)
+                if (lockfile.packages) {
+                    for (const [pkgPath, pkgInfo] of Object.entries(lockfile.packages)) {
+                        if (pkgPath === '' || !pkgInfo || typeof pkgInfo !== 'object' || !('version' in pkgInfo)) {
+                            continue;
+                        }
+                        // Clean out the "node_modules/" prefix path string
+                        const cleanPkgName = pkgPath.replace(/^node_modules\//, '');
+                        if (cleanPkgName && typeof pkgInfo.version === 'string') {
+                            dependenciesToScan[cleanPkgName] = pkgInfo.version;
+                        }
+                    }
+                } else if (lockfile.dependencies) {
+                    // Backwards fallback support for legacy v1 lockfile formats
+                    for (const [pkgName, pkgInfo] of Object.entries(lockfile.dependencies)) {
+                        if (pkgInfo && typeof pkgInfo === 'object' && 'version' in pkgInfo && typeof pkgInfo.version === 'string') {
+                            dependenciesToScan[pkgName] = pkgInfo.version;
+                        }
+                    }
+                }
+
+                console.log(`Status: Analyzing complete graph consisting of ${Object.keys(dependenciesToScan).length} transitive dependencies...`);
+                const result = await this.evaluateDependencies(dependenciesToScan);
+                dependencyFindings = result.findings;
+                totalScanned = result.totalScanned;
+                scanTargetContext = 'package-lock.json & Contracts';
+
+            } catch (error) {
+                console.error("Warning: Lockfile evaluation process aborted due to corruption errors.");
+            }
+        } else if (fs.existsSync(packageJsonPath)) {
+            try {
+                console.log(`System: Lockfile absent. Parsing top-level manifest file at ${packageJsonPath}...`);
+                const fileContent = fs.readFileSync(packageJsonPath, 'utf8');
                 const manifest = JSON.parse(fileContent);
                 
                 const dependencies = {
@@ -44,6 +86,7 @@ export class ScannerEngine {
                 const result = await this.evaluateDependencies(dependencies);
                 dependencyFindings = result.findings;
                 totalScanned = result.totalScanned;
+                scanTargetContext = 'package.json & Contracts';
 
             } catch (error) {
                 console.error("Error: Failed to parse the target manifest file safely.");
@@ -58,7 +101,7 @@ export class ScannerEngine {
 
         const report: ScanReport = {
             timestamp: new Date().toISOString(),
-            targetFile: fs.existsSync(filePath) ? 'package.json & Contracts' : 'Contracts Only',
+            targetFile: scanTargetContext,
             summary: {
                 totalDependenciesScanned: totalScanned,
                 vulnerabilitiesIdentified: allFindings.length
